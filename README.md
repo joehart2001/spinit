@@ -90,7 +90,7 @@ If you use `spinit` in scientific work, please cite:
 ```bibtex
 @software{spinit,
   author  = {Hart, Joseph},
-  title   = {spinit: physically informed spin initialisation for atomistic structures},
+  title   = {spinit: Physically informed spin initialisation for atomistic structures},
   year    = {2026},
   version = {0.1.0},
   url     = {https://github.com/joehart2001/spinit}
