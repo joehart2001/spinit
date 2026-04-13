@@ -1,6 +1,6 @@
 ![spinit logo](spinit_logo.svg)
 
-# spinit
+# spinit: physically informed spin initialisation for atomistic structures
 
 `spinit` seeds **initial magnetic moments** to `ase.Atoms` using local chemistry, topology, and geometry criteria to provide physically motivated spin initialisation. This is useful for e.g. spin-polarised DFT of large strucutres where spins cannot (reasonably) be manually assigned.
 
@@ -89,7 +89,7 @@ If you use `spinit` in scientific work, please cite:
 ```bibtex
 @software{spinit,
   author  = {Hart, Joseph},
-  title   = {spinit: Motif-aware spin initialisation for atomistic structures},
+  title   = {spinit: physically informed spin initialisation for atomistic structures},
   year    = {2026},
   version = {0.1.0},
   url     = {https://github.com/joehart2001/spinit}
