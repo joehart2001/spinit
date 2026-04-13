@@ -1,6 +1,6 @@
 ![spinit logo](spinit_logo.svg)
 
-## spinit
+## **spinit**: Physically informed spin initialisation for atomistic structures
 
 **Physically informed spin initialisation for atomistic structures**
 
