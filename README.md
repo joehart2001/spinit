@@ -2,13 +2,13 @@
 
 # spinit
 
-`spinit` assigns **initial magnetic moments** for spin-polarized DFT calculations using local chemistry, topology, and geometry heuristics on `ase.Atoms` structures.
+`spinit` seeds **initial magnetic moments** to `ase.Atoms` using local chemistry, topology, and geometry criteria to provide physically motivated spin initialisation. This is useful for e.g. spin-polarised DFT of large strucutres where spins cannot (reasonably) be manually assigned.
 
-It is designed for carbon-rich systems (graphenic, nanoporous, amorphous carbon) and mixed chemistries containing heteroatoms (H/O/N/other).
+It is designed for carbon-rich systems, including graphenic, nanoporous, and amorphous carbon, as well as mixed chemistries containing heteroatoms such as H, O, and N.
 
 ## Scientific Scope
 
-`spinit` is a **heuristic seed generator** for SCF initialization.
+`spinit` is a **heuristic spin seed generator**.
 
 - It does not prove magnetic ground states.
 - It provides physically motivated initial spin patterns to improve exploration of plausible spin solutions.
@@ -19,7 +19,7 @@ It is designed for carbon-rich systems (graphenic, nanoporous, amorphous carbon)
 - PBC-aware bond graph construction (ASE + MIC vectors).
 - Ring/topology analysis from local graph cycles.
 - Hybridization-like local classification (`sp`, `sp2`, `sp3`, distorted variants).
-- Explicit motif detection for O/N/H/C-centered local environments.
+- Motif-aware handling of O/N/H/C-centered local environments.
 - Connectivity-aware classification of network-bound vs molecular fragments.
 - Transparent additive scoring with configurable thresholds and weights.
 - Multiple assignment strategies:
@@ -84,4 +84,16 @@ pytest
 
 ## Citation
 
-If you use `spinit` in scientific work, please cite the software metadata in [`CITATION.cff`](./CITATION.cff).
+If you use `spinit` in scientific work, please cite:
+
+```bibtex
+@software{spinit,
+  author  = {Hart, Joseph},
+  title   = {spinit: Motif-aware spin initialisation for atomistic structures},
+  year    = {2026},
+  version = {0.1.0},
+  url     = {https://github.com/joehart2001/spinit}
+}
+```
+
+Full machine-readable metadata is available in [`CITATION.cff`](./CITATION.cff).
