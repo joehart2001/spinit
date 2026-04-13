@@ -1,3 +1,5 @@
+![spinit logo](spinit_logo.svg)
+
 # spinit
 
 `spinit` assigns **initial magnetic moments** for spin-polarized DFT calculations using local chemistry, topology, and geometry heuristics on `ase.Atoms` structures.
