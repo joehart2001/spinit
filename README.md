@@ -1,9 +1,8 @@
 ![spinit logo](spinit_logo.svg)
 
 ## **spinit**
-### Physically informed spin initialisation for atomistic structures
+> Physically informed spin initialisation for atomistic structures
 
-**Physically informed spin initialisation for atomistic structures**
 
 `spinit` seeds **initial magnetic moments** to `ase.Atoms` using local chemistry, topology, and geometry criteria to provide physically motivated spin initialisation. This is useful for e.g. spin-polarised DFT of large strucutres where spins cannot (reasonably) be manually assigned.
 
