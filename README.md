@@ -1,6 +1,6 @@
 ![spinit logo](spinit_logo.svg)
 
-# sp*init*
+## sp*init*
 
 **Physically informed spin initialisation for atomistic structures**
 
