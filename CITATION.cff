@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use spinit, please cite it using this metadata."
+type: software
+title: "spinit: Motif-aware initial magnetic moment seeding for spin-polarized DFT"
+authors:
+  - family-names: Hart
+    given-names: Joseph
+repository-code: "https://github.com/joehart2001/spinit"
+url: "https://github.com/joehart2001/spinit"
+license: MIT
+version: 0.1.0
+year: 2026

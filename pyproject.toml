@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spinit"
+version = "0.1.0"
+description = "Motif-aware initial magnetic moment seeding for spin-polarized DFT on carbon-rich materials."
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Joseph Hart" }
+]
+keywords = [
+  "dft",
+  "magnetism",
+  "spin",
+  "ase",
+  "materials-science",
+  "carbon",
+  "graphene",
+  "amorphous-carbon",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+  "ase>=3.22",
+  "numpy>=1.24",
+  "networkx>=3.0",
+]
+
+[project.optional-dependencies]
+reporting = [
+  "pandas>=1.5",
+]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.5",
+  "build>=1.2",
+  "twine>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/joehart2001/spinit"
+Repository = "https://github.com/joehart2001/spinit"
+Issues = "https://github.com/joehart2001/spinit/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
