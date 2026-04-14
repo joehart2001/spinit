@@ -25,7 +25,11 @@ def build_graph_with_mic_geometry(
     pair_cutoffs: Mapping[tuple[str, str], float] | None = None,
     include_self_edges: bool = False,
 ) -> nx.Graph:
-    """Build multi-element bond graph with pair cutoffs and attach MIC geometry."""
+    """Build multi-element bond graph and attach minimum-image convention (MIC) geometry.
+
+    Context: Most downstream features need both connectivity and bond vectors
+    under periodic boundary conditions, so this is the standard graph entry point.
+    """
     elements_present = get_present_elements(atoms)
 
     if pair_cutoffs is None:
@@ -67,7 +71,11 @@ def attach_mic_geometry_to_graph(
     cutoff: float | Mapping[tuple[str, str], float],
     include_self_edges: bool = False,
 ) -> None:
-    """Attach directed MIC bond vectors and lengths to graph attributes."""
+    """Attach directed minimum-image convention (MIC) bond vectors and lengths.
+
+    Context: Strain, angles, and local-orbital alignment rely on direction-aware
+    bond geometry, which must be computed with periodic images handled correctly.
+    """
     atoms.wrap()
 
     nl_cutoff: float | dict[tuple[str, str], float]
@@ -115,10 +123,15 @@ def attach_mic_geometry_to_graph(
 def require_bond_geometry(
     G: nx.Graph,
 ) -> tuple[dict[tuple[int, int], np.ndarray], dict[tuple[int, int], float]]:
-    """Return graph MIC geometry maps or raise a clear error."""
+    """Return graph minimum-image convention (MIC) geometry maps or raise a clear error.
+
+    Context: Centralized validation here prevents silent failures when geometry-dependent
+    routines are called on a graph that only has connectivity.
+    """
     if "bond_vectors" not in G.graph or "bond_lengths" not in G.graph:
         raise ValueError(
-            "Graph missing MIC geometry. Use build_graph_with_mic_geometry(...) "
+            "Graph missing minimum-image convention (MIC) geometry. "
+            "Use build_graph_with_mic_geometry(...) "
             "or attach_mic_geometry_to_graph(...)."
         )
     return G.graph["bond_vectors"], G.graph["bond_lengths"]
@@ -138,7 +151,7 @@ def count_neighbors_by_element(atoms: Atoms, G: nx.Graph, i: int) -> dict[str, i
 
 
 def get_bond_vectors(G: nx.Graph, i: int) -> list[np.ndarray]:
-    """Return directed MIC bond vectors from i to each neighbor."""
+    """Return directed minimum-image convention (MIC) bond vectors from i to each neighbor."""
     bond_vectors, _ = require_bond_geometry(G)
     vectors: list[np.ndarray] = []
     for j in get_neighbors(G, i):
@@ -149,7 +162,7 @@ def get_bond_vectors(G: nx.Graph, i: int) -> list[np.ndarray]:
 
 
 def get_bond_lengths(G: nx.Graph, i: int) -> list[float]:
-    """Return MIC bond lengths from i to each neighbor."""
+    """Return minimum-image convention (MIC) bond lengths from i to each neighbor."""
     _, bond_lengths = require_bond_geometry(G)
     lengths: list[float] = []
     for j in get_neighbors(G, i):

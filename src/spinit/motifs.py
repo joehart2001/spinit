@@ -18,7 +18,11 @@ from .hybridization import is_sp2_like_label
 
 
 def build_component_context(atoms: Atoms, G: nx.Graph, config: Mapping[str, Any]) -> dict[str, Any]:
-    """Build connectivity metadata to distinguish network-bound vs fragment atoms."""
+    """Build connectivity metadata to distinguish network-bound vs fragment atoms.
+
+    Context: Motif meaning changes between extended carbon networks and small
+    disconnected molecules, so this component map is used to separate those regimes.
+    """
     carbon_symbol = str(config["carbon_symbol"])
     mcfg = config.get("motif_detection", {})
     network_min_size = int(mcfg.get("network_min_component_size", 20))
@@ -125,7 +129,11 @@ def detect_oxygen_motif(
     component_status: Mapping[str, Any],
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Detect oxygen-centered motifs (hydroxyl/ether/epoxy/carbonyl/etc.)."""
+    """Detect oxygen-centered motifs (hydroxyl/ether/epoxy/carbonyl/etc.).
+
+    Context: Oxygen can either quench spins (closed-shell functional groups) or
+    occasionally host open-shell character, so explicit motif labels avoid over-seeding.
+    """
     coord = int(len(neighbors))
     c_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "C"]
     h_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "H"]
@@ -250,7 +258,11 @@ def detect_nitrogen_motif(
     hybridization: str,
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Detect nitrogen-centered motifs (graphitic/pyridinic/pyrrolic/etc.)."""
+    """Detect nitrogen-centered motifs (graphitic/pyridinic/pyrrolic/etc.).
+
+    Context: Nitrogen can behave as a dopant, a closed-shell substituent, or an
+    open-shell center depending on local bonding, so it needs explicit environment logic.
+    """
     coord = int(len(neighbors))
     c_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "C"]
     h_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "H"]
@@ -353,7 +365,11 @@ def detect_hydrogen_motif(
     component_status: Mapping[str, Any],
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Detect hydrogen roles (terminating H, O-H/N-H, H2-like, adsorbed H)."""
+    """Detect hydrogen roles (terminating H, O-H/N-H, H2-like, adsorbed H).
+
+    Context: Hydrogen is often a terminator that suppresses radical character,
+    but isolated or unusual H motifs can still indicate open-shell fragments.
+    """
     coord = int(len(neighbors))
     mcfg = config.get("motif_detection", {})
     component_size = int(component_status["component_size"])
@@ -446,7 +462,11 @@ def detect_carbon_motif(
     component_status: Mapping[str, Any],
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Detect carbon motifs, including gas-like fragments vs network-bound sites."""
+    """Detect carbon motifs, including gas-like fragments vs network-bound sites.
+
+    Context: Carbon in the main network and carbon in detached molecules should
+    not be scored the same, so this tags fragment chemistry separately from network sites.
+    """
     coord = int(len(neighbors))
     c_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "C"]
     h_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "H"]
@@ -584,7 +604,11 @@ def classify_atom_motif(
     component_context: Mapping[str, Any],
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Classify atom motif and chemistry role (closed-shell/modifier/open-shell)."""
+    """Classify atom motif and chemistry role (closed-shell/modifier/open-shell).
+
+    Context: This is the single dispatch point that harmonizes element-specific
+    motif detectors into shared flags used by feature building and magnetic scoring.
+    """
     element = str(atoms[i].symbol)
     neighbors = get_neighbors(G, i)
     neighbor_counts = count_neighbors_by_element(atoms, G, i)

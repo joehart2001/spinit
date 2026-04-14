@@ -23,7 +23,11 @@ def get_weights_for_element(element: str, config: Mapping[str, Any]) -> Mapping[
 
 
 def compute_motif_intrinsic_modifier(features: Mapping[str, Any], config: Mapping[str, Any]) -> float:
-    """Return additive score term from explicit motif labels and motif role flags."""
+    """Return additive score term from explicit motif labels and motif role flags.
+
+    Context: This lets chemically meaningful motifs override generic coordination
+    heuristics, which is important for closed-shell molecules and known open-shell motifs.
+    """
     mcfg = config.get("motif_scoring", {})
     label_weights = dict(mcfg.get("label_weights", {}))
     motif_label = str(features.get("motif_label", ""))
@@ -48,7 +52,11 @@ def compute_neighbor_modifier(
     features: Mapping[str, Any],
     config: Mapping[str, Any],
 ) -> float:
-    """Return score modifier from neighboring element chemistry and motif labels."""
+    """Return score modifier from neighboring element chemistry and motif labels.
+
+    Context: Nearby atoms can quench or enhance local spin tendency, so this term
+    captures first-neighbor chemical environment effects separately from intrinsic site terms.
+    """
     element = str(features.get("element", ""))
     neighbor_counts = dict(features.get("neighbor_counts_by_element", {}))
     neighbor_motif_counts = dict(features.get("neighbor_motif_counts", {}))
@@ -69,7 +77,11 @@ def compute_neighbor_modifier(
 
 
 def compute_intrinsic_site_score(features: Mapping[str, Any], config: Mapping[str, Any]) -> float:
-    """Compute intrinsic (local) site score before neighbor-element modifiers."""
+    """Compute intrinsic (local) site score before neighbor-element modifiers.
+
+    Context: This is the core additive heuristic where undercoordination,
+    unsaturation, strain, and motif signals are combined at the atom itself.
+    """
     if not bool(features.get("is_candidate_element", False)):
         return 0.0
 
@@ -134,7 +146,11 @@ def assign_all_magnetic_scores(
     feature_dict: Mapping[int, dict[str, Any]],
     config: Mapping[str, Any],
 ) -> dict[int, float]:
-    """Assign intrinsic, modifier, and total magnetic score to all atoms."""
+    """Assign intrinsic, modifier, and total magnetic score to all atoms.
+
+    Context: Storing score components per atom makes the seeding decisions
+    auditable and easier to tune without changing model structure.
+    """
     scores: dict[int, float] = {}
     for i, features in feature_dict.items():
         intrinsic = compute_intrinsic_site_score(features, config)
@@ -152,7 +168,11 @@ def select_magnetic_candidate_sites(
     feature_dict: Mapping[int, Mapping[str, Any]],
     config: Mapping[str, Any],
 ) -> list[int]:
-    """Return candidate indices with score above element-aware threshold."""
+    """Return candidate indices with score above element-aware threshold.
+
+    Context: Candidate filtering is kept explicit so moment assignment strategies
+    (aligned, alternating, random-sign) operate on the same chemically screened set.
+    """
     default_thresh = float(config["candidate_score_threshold"])
     thresh_by_elem = config.get("candidate_score_threshold_by_element", {})
 

@@ -17,7 +17,12 @@ def classify_hybridization(
     bond_angles: Sequence[float],
     config: Mapping[str, Any],
 ) -> str:
-    """Classify local environment into simple hybridization-like labels."""
+    """Classify local environment into simple hybridization-like labels.
+
+    Context: This gives a lightweight chemical-state label that downstream
+    unsaturation and strain checks use when deciding where initial spin seeds
+    are chemically plausible.
+    """
     hcfg = config["hybridization"]
 
     if coordination <= 0:
@@ -60,7 +65,11 @@ def classify_hybridization(
 
 
 def classify_all_hybridizations(G: nx.Graph, config: Mapping[str, Any]) -> dict[int, str]:
-    """Classify hybridization-like labels for all graph nodes."""
+    """Classify hybridization-like labels for all graph nodes.
+
+    Context: The full-node map is reused across feature extraction so we apply
+    one consistent hybridization heuristic everywhere in the pipeline.
+    """
     labels: dict[int, str] = {}
     for i in G.nodes:
         i = int(i)
@@ -89,7 +98,11 @@ def detect_pi_unsaturated_site(
     bond_angles: Sequence[float],
     config: Mapping[str, Any],
 ) -> bool:
-    """Return True for pi-unsaturated / localized-spin-like environments."""
+    """Return True for pi-unsaturated / localized-spin-like environments.
+
+    Context: This flags sites where pi bonding is likely incomplete or distorted,
+    which makes spin localization more likely than in well-satisfied closed-shell sites.
+    """
     if coordination <= 1:
         return True
     if coordination == 2:
@@ -121,7 +134,11 @@ def evaluate_sp_carbon_environment(
     neighbor_counts_by_element: Mapping[str, int],
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Classify whether a carbon sp site looks heteroatom-modified vs radical-like."""
+    """Classify whether a carbon sp site looks heteroatom-modified vs radical-like.
+
+    Context: Not all sp carbons should seed moments; this function separates
+    chemically satisfied sp motifs from genuinely unsatisfied radical-like cases.
+    """
     is_sp_site = bool(coordination == 2 and hybridization == "sp")
     if not is_sp_site:
         return {
@@ -164,7 +181,11 @@ def is_sp2_like_label(label: str) -> bool:
 
 
 def estimate_sp2_normal(G: nx.Graph, i: int) -> np.ndarray | None:
-    """Estimate local pz-like normal for a 3-fold site."""
+    """Estimate local pz-like normal for a 3-fold site.
+
+    Context: This approximates local p-orbital orientation at sp2-like sites so
+    we can detect when neighboring pz directions are misaligned and pi overlap is reduced.
+    """
     vectors = get_bond_vectors(G, i)
     if len(vectors) != 3:
         return None
@@ -194,7 +215,11 @@ def estimate_sp2_normal(G: nx.Graph, i: int) -> np.ndarray | None:
 
 
 def measure_sp2_pyramidalization(G: nx.Graph, i: int) -> float | None:
-    """Measure deviation from ideal planar sp2 geometry in degrees."""
+    """Measure deviation from ideal planar sp2 geometry in degrees.
+
+    Context: Pyramidalization quantifies how far a nominally sp2 site bends out
+    of plane, which is a practical strain signal for weakened delocalized pi bonding.
+    """
     normal = estimate_sp2_normal(G, i)
     if normal is None:
         return None
@@ -219,7 +244,11 @@ def measure_sp2_pi_alignment(
     i: int,
     hybridizations: Mapping[int, str],
 ) -> float | None:
-    """Measure mean |n_i . n_j| against neighboring sp2-like normals."""
+    """Measure mean |n_i . n_j| against neighboring sp2-like normals.
+
+    Context: Lower alignment indicates neighboring pz-like directions are not
+    co-oriented, which reduces local pi overlap and supports spin-seed placement.
+    """
     if not is_sp2_like_label(hybridizations.get(i, "")):
         return None
 
@@ -246,7 +275,11 @@ def is_strained_sp2_site(
     hybridizations: Mapping[int, str],
     config: Mapping[str, Any],
 ) -> bool:
-    """Return True when sp2-like local geometry indicates strain/poor pi overlap."""
+    """Return True when sp2-like local geometry indicates strain/poor pi overlap.
+
+    Context: This combines out-of-plane bending and pi-normal misalignment into
+    one conservative strained-site flag for magnetic scoring.
+    """
     if not is_sp2_like_label(hybridizations.get(i, "unknown")):
         return False
 

@@ -16,7 +16,11 @@ def _is_isolated_o2_like_cluster(
     cluster: list[int],
     feature_dict: Mapping[int, Mapping[str, Any]],
 ) -> bool:
-    """Return True when cluster is an isolated O2-like molecular motif."""
+    """Return True when cluster is an isolated O2-like molecular motif.
+
+    Context: Isolated O2-like pairs are handled with a special parallel-spin override
+    because generic alternating-sign graph assignment is not the right default for this motif.
+    """
     if len(cluster) != 2:
         return False
 
@@ -39,7 +43,11 @@ def _is_isolated_o2_like_cluster(
 
 
 def candidate_moment_amplitude(features: Mapping[str, Any], config: Mapping[str, Any]) -> float:
-    """Map candidate score to moment amplitude with element-aware scaling."""
+    """Map candidate score to moment amplitude with element-aware scaling.
+
+    Context: Scores determine if a site is plausible, while this function sets
+    the seed magnitude so stronger local evidence gets larger initial moments.
+    """
     mcfg = config["moment_assignment"]
     element = str(features.get("element", ""))
 
@@ -64,7 +72,7 @@ def assign_moments_fm(
     feature_dict: Mapping[int, Mapping[str, Any]],
     config: Mapping[str, Any],
 ) -> np.ndarray:
-    """Assign ferromagnetic (+) moments on selected candidates."""
+    """Assign ferromagnetic (FM, all-positive) moments on selected candidates."""
     magmoms = np.zeros(len(atoms), dtype=float)
     for i in select_magnetic_candidate_sites(feature_dict, config):
         magmoms[i] = candidate_moment_amplitude(feature_dict[i], config)
@@ -77,7 +85,11 @@ def assign_moments_afm_clusters(
     feature_dict: Mapping[int, Mapping[str, Any]],
     config: Mapping[str, Any],
 ) -> np.ndarray:
-    """Assign AFM-like signs by alternating signs inside connected candidate clusters."""
+    """Assign antiferromagnetic-like (AFM-like) signs inside connected candidate clusters.
+
+    Context: This applies graph-coloring-style sign alternation as a practical
+    initialization heuristic for connected candidate regions, not a proof of ordering.
+    """
     magmoms = np.zeros(len(atoms), dtype=float)
     candidate_sites = select_magnetic_candidate_sites(feature_dict, config)
     if len(candidate_sites) == 0:

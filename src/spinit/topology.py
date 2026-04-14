@@ -20,7 +20,11 @@ def compute_topological_defect_score(
     element: str,
     config: Mapping[str, Any],
 ) -> float:
-    """Return topology score, active mainly for configured carbon-like elements."""
+    """Return topology score, active mainly for configured carbon-like elements.
+
+    Context: Ring topology is treated as a supporting signal that can raise or
+    lower plausibility around non-hexagonal environments, but not as sole evidence.
+    """
     if str(element) not in set(map(str, config["elements"]["topology_active_elements"])):
         return 0.0
 

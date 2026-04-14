@@ -37,7 +37,11 @@ def compute_element_specific_features(
     motif_info: Mapping[str, Any],
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Compute element-aware site features without assuming specific heteroatoms."""
+    """Compute element-aware site features without assuming specific heteroatoms.
+
+    Context: This keeps carbon-centered logic while safely handling mixed-element
+    systems so non-carbon atoms are described without carbon-only assumptions.
+    """
     element = str(atoms[i].symbol)
     coordination = len(get_neighbors(G, i))
 
@@ -107,7 +111,11 @@ def compute_atom_features(
     i: int,
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Compute plain-dictionary feature bundle for one atom."""
+    """Compute plain-dictionary feature bundle for one atom.
+
+    Context: This assembles geometry, topology, motif, and chemistry indicators
+    into one inspectable record that downstream scoring can use transparently.
+    """
     element = str(atoms[i].symbol)
     neighbors = get_neighbors(G, i)
     coordination = len(neighbors)
@@ -182,7 +190,11 @@ def compute_all_atom_features(
     ring_sizes_per_atom: Sequence[Sequence[int]],
     config: Mapping[str, Any],
 ) -> dict[int, dict[str, Any]]:
-    """Compute feature dictionary for all atoms, keyed by atom index."""
+    """Compute feature dictionary for all atoms, keyed by atom index.
+
+    Context: This is the main feature-construction pass used before scoring, and
+    it also adds neighbor motif summaries needed for local environment modifiers.
+    """
     hybridizations = classify_all_hybridizations(G, config)
     component_context = build_component_context(atoms, G, config)
 

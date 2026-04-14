@@ -51,7 +51,11 @@ def build_bond_graph_from_atoms(
 
 
 def cycle_key(cycle_nodes):
-    """Return a stable key for a cycle, invariant to rotation and traversal direction."""
+    """Return a stable key for a cycle, invariant to rotation and traversal direction.
+
+    Context: The same ring can be discovered from different start atoms and path
+    directions, so this key lets us deduplicate equivalent cycle descriptions.
+    """
     if len(cycle_nodes) >= 2 and cycle_nodes[0] == cycle_nodes[-1]:
         cycle_nodes = cycle_nodes[:-1]
 
@@ -80,7 +84,11 @@ def e_smallest_local_rings_for_v(
     maxlength: int = 12,
     k_hops: int | None = 5,
 ) -> list[list[int]]:
-    """For node v with degree e, find up to e smallest local rings touching v."""
+    """For node v with degree e, find up to e smallest local rings touching v.
+
+    Context: Local ring signatures are used as supporting topology features, so
+    we keep the search near each atom instead of enumerating all global cycles.
+    """
     neighbors = list(G.neighbors(v))
     degree = len(neighbors)
     if degree < 2:
@@ -127,7 +135,11 @@ def e_smallest_local_rings_all_atoms(
     maxlength: int = 12,
     k_hops: int | None = 5,
 ) -> tuple[list[list[list[int]]], list[list[int]]]:
-    """Return per-atom local rings and ring sizes."""
+    """Return per-atom local rings and ring sizes.
+
+    Context: This runs the local-ring detection once for the full structure so
+    per-atom topology metrics can be reused in feature extraction and reporting.
+    """
     num_nodes = G.number_of_nodes()
     rings_per_atom = []
     ring_sizes_per_atom = []
@@ -174,7 +186,11 @@ def unique_primitive_rings_by_size(
     G: nx.Graph,
     sizes=(3, 4, 5, 6, 7, 8),
 ) -> dict[int, int]:
-    """Deduplicate cycles across all atoms to estimate unique primitive ring counts."""
+    """Deduplicate cycles across all atoms to estimate unique primitive ring counts.
+
+    Context: Per-atom ring membership overcounts shared rings, so this provides a
+    structure-level primitive-ring summary for diagnostics and sanity checks.
+    """
     allowed = set(sizes)
     seen = set()
     counts = Counter()

@@ -31,7 +31,11 @@ def assign_initial_magnetic_moments(
     k_hops: int = 5,
     seed: int = 0,
 ) -> tuple[np.ndarray, dict[int, dict[str, Any]], nx.Graph, dict[str, Any]]:
-    """End-to-end multi-element spin-seed pipeline."""
+    """End-to-end multi-element spin-seed pipeline.
+
+    Context: This is the public entry point that connects graph building,
+    motif-aware feature detection, scoring, and strategy-based moment assignment.
+    """
     cfg = merge_config(config)
 
     G = build_graph_with_mic_geometry(
