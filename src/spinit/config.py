@@ -222,7 +222,7 @@ def default_config() -> dict[str, Any]:
             "moderate_moment": 0.6,
             "weak_moment": 0.35,
             "min_candidate_moment": 0.25,
-            "max_candidate_moment": 1.2,
+            "max_candidate_moment": 1.0,
             "score_to_moment_scale": 0.15,
             "element_moment_scale": {
                 "C": 1.0,
