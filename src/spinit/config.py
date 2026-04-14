@@ -224,6 +224,8 @@ def default_config() -> dict[str, Any]:
             "min_candidate_moment": 0.25,
             "max_candidate_moment": 1.0,
             "score_to_moment_scale": 0.15,
+            "o2_parallel_override_in_afm": True,
+            "o2_parallel_sign": 1.0,
             "element_moment_scale": {
                 "C": 1.0,
                 "N": 0.7,
