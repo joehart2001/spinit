@@ -3,7 +3,7 @@
 ## Physically informed spin initialisation for atomistic structures
 
 
-`spinit` seeds **initial magnetic moments** to `ase.Atoms` using local chemistry, topology, and geometry criteria to provide physically motivated spin initialisation. This is useful for e.g. spin-polarised DFT of large strucutres where spins cannot (reasonably) be manually assigned.
+`spinit` seeds **initial magnetic moments** to `ase.Atoms` using local chemistry, topology, and geometry criteria to provide physically motivated spin initialisation. This is useful for e.g. spin-polarised DFT of large structures where spins cannot (reasonably) be manually assigned.
 
 It is designed for carbon-rich systems, including graphenic, nanoporous, and amorphous carbon, as well as mixed chemistries containing heteroatoms such as H, O, and N.
 
@@ -14,6 +14,7 @@ It is designed for carbon-rich systems, including graphenic, nanoporous, and amo
 - It does not prove magnetic ground states.
 - It provides physically motivated initial spin patterns to improve exploration of plausible spin solutions.
 - It combines undercoordination, local geometry/strain, ring topology, and explicit motif detection.
+- Motif labels are heuristic local-environment descriptors (`*_like`) and do not by themselves assign formal bond order, oxidation state, or molecular charge.
 
 ## Features
 

@@ -1,4 +1,9 @@
-"""Connectivity-aware local motif detection for multi-element structures."""
+"""Connectivity-aware local motif detection for multi-element structures.
+
+Motif labels in this module are heuristic connectivity descriptors. Names ending
+in ``_like`` indicate local-environment similarity and are not formal assignments
+of bond order, oxidation state, aromaticity, or molecular charge.
+"""
 
 from __future__ import annotations
 
@@ -133,6 +138,8 @@ def detect_oxygen_motif(
 
     Context: Oxygen can either quench spins (closed-shell functional groups) or
     occasionally host open-shell character, so explicit motif labels avoid over-seeding.
+    Labels such as ``hydroxide_like_O`` denote OH-fragment-like local connectivity
+    and do not imply a formal anionic charge assignment.
     """
     coord = int(len(neighbors))
     c_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "C"]
@@ -262,6 +269,8 @@ def detect_nitrogen_motif(
 
     Context: Nitrogen can behave as a dopant, a closed-shell substituent, or an
     open-shell center depending on local bonding, so it needs explicit environment logic.
+    ``graphitic``/``pyridinic_like``/``pyrrolic_like`` labels are topology-guided
+    local categories rather than strict aromaticity proofs.
     """
     coord = int(len(neighbors))
     c_neighbors = [int(j) for j in neighbors if str(atoms[j].symbol) == "C"]
