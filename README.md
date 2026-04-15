@@ -65,17 +65,13 @@ atoms.set_initial_magnetic_moments(magmoms)
 
 ## Package Layout
 
-- `spinit.config`: defaults and config merge helpers.
-- `spinit.bond_graph`: graph/ring primitives.
-- `spinit.graph_ops`: graph construction + MIC geometry + local graph accessors.
-- `spinit.geometry`: vector/angle utilities.
-- `spinit.hybridization`: local chemistry + sp2 strain logic.
-- `spinit.motifs`: connectivity and motif detection.
-- `spinit.features`: per-atom feature construction.
-- `spinit.scoring`: magnetic scoring and candidate selection.
-- `spinit.assignment`: magnetic moment sign/amplitude assignment strategies.
-- `spinit.reporting`: summary utilities.
 - `spinit.api`: high-level end-to-end API.
+- `spinit.config`: defaults and config merge helpers.
+- `spinit.graph`: graph/ring/geometry/topology utilities.
+- `spinit.chemistry`: hybridization, motif detection, and per-atom feature construction.
+- `spinit.seeding`: magnetic scoring and moment assignment strategies.
+- `spinit.output`: reporting/summary utilities.
+- Compatibility modules (`spinit.bond_graph`, `spinit.graph_ops`, `spinit.hybridization`, etc.) still exist and re-export the new subpackage implementations.
 
 ## Development
 

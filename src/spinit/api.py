@@ -8,17 +8,17 @@ import networkx as nx
 import numpy as np
 from ase import Atoms
 
-from .assignment import assign_moments_afm_clusters, assign_moments_fm, assign_moments_random_candidates
-from .bond_graph import (
+from .chemistry.features import compute_all_atom_features
+from .config import get_present_elements, merge_config
+from .graph.bond_graph import (
     e_smallest_local_rings_all_atoms,
     ring_memberships_by_size,
     unique_primitive_rings_by_size,
 )
-from .config import get_present_elements, merge_config
-from .features import compute_all_atom_features
-from .graph_ops import build_graph_with_mic_geometry
-from .scoring import assign_all_magnetic_scores
-from .topology import summarize_ring_statistics
+from .graph.graph_ops import build_graph_with_mic_geometry
+from .graph.topology import summarize_ring_statistics
+from .seeding.assignment import assign_moments_afm_clusters, assign_moments_fm, assign_moments_random_candidates
+from .seeding.scoring import assign_all_magnetic_scores
 
 
 def assign_initial_magnetic_moments(
