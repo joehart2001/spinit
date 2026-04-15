@@ -1,5 +1,8 @@
 ![spinit logo](spinit_logo.svg)
 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19595734.svg)](https://doi.org/10.5281/zenodo.19595734) [![PyPI](https://img.shields.io/pypi/v/spinit.svg)](https://pypi.org/project/spinit/)
+
 ## Physically informed spin initialisation for atomistic structures
 
 
