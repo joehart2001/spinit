@@ -1,6 +1,6 @@
 from ase import Atoms
 
-from spinit import assign_initial_magnetic_moments
+from spinit.api import assign_initial_magnetic_moments
 
 
 def test_assign_initial_magnetic_moments_smoke() -> None:

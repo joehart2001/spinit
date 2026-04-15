@@ -2,7 +2,7 @@
 
 from .api import assign_initial_magnetic_moments
 from .config import default_config, get_default_pair_cutoffs, get_present_elements, merge_config
-from .reporting import make_feature_table, print_candidate_summary, print_feature_summary
+from .output.reporting import make_feature_table, print_candidate_summary, print_feature_summary
 
 __all__ = [
     "assign_initial_magnetic_moments",

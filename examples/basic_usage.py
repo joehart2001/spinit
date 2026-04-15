@@ -2,7 +2,7 @@
 
 from ase.io import read
 
-from spinit import assign_initial_magnetic_moments
+from spinit.api import assign_initial_magnetic_moments
 
 
 atoms = read("structure.xyz")

@@ -47,7 +47,7 @@ pip install -e .[reporting]
 
 ```python
 from ase.io import read
-from spinit import assign_initial_magnetic_moments
+from spinit.api import assign_initial_magnetic_moments
 
 atoms = read("structure.xyz")
 
@@ -71,7 +71,6 @@ atoms.set_initial_magnetic_moments(magmoms)
 - `spinit.chemistry`: hybridization, motif detection, and per-atom feature construction.
 - `spinit.seeding`: magnetic scoring and moment assignment strategies.
 - `spinit.output`: reporting/summary utilities.
-- Compatibility modules (`spinit.bond_graph`, `spinit.graph_ops`, `spinit.hybridization`, etc.) still exist and re-export the new subpackage implementations.
 
 ## Development
 
