@@ -7,7 +7,6 @@ It is intended for contributors and maintainers.
 
 - Public entry points are in the top-level package files (`__init__.py`, `api.py`, `config.py`).
 - Implementation is grouped into focused subpackages: `graph`, `chemistry`, `seeding`, and `output`.
-- There are no legacy compatibility wrapper modules in this directory layout.
 
 ## Directory: `src/spinit/`
 
