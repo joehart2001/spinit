@@ -75,12 +75,6 @@ atoms.set_initial_magnetic_moments(magmoms)
 - `spinit.seeding`: magnetic scoring and moment assignment strategies.
 - `spinit.output`: reporting/summary utilities.
 
-## Development
-
-```bash
-pip install -e .[dev]
-pytest
-```
 
 ## Citation
 
