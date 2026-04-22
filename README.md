@@ -29,8 +29,11 @@ It is designed for carbon-rich systems, including graphenic, nanoporous, and amo
 - Transparent additive scoring with configurable thresholds and weights.
 - Multiple assignment strategies:
   - `fm`
+  - `fm_soft`
   - `afm_clusters`
+  - `afm_soft`
   - `random_candidates`
+  - `balanced_random_soft`
 
 ## Installation
 
@@ -64,6 +67,47 @@ magmoms, feature_dict, graph, ring_info = assign_initial_magnetic_moments(
 )
 
 atoms.set_initial_magnetic_moments(magmoms)
+```
+
+## SCF Restarts And Convergence Rescue
+
+If a spin-polarised DFT calculation is struggling to converge, reinitialisaiton
+of the spin with a smaller or less prescriptive magnetic seed can sometimes help 
+with SCF convergence.
+
+The restart-oriented strategies in `spinit` keep the same chemically screened
+candidate sites, but soften the assigned initial moments:
+
+- `fm_soft`: small all-positive moments on the selected candidate atoms. This is
+  a good first retry when a stronger AFM/FM seed is too aggressive.
+- `afm_soft`: the same cluster-based sign pattern as `afm_clusters`, but with
+  reduced amplitudes. Use this when you still want local AFM-like structure
+  without a large initial spin splitting.
+- `balanced_random_soft`: small random `+/-` moments chosen to keep the total
+  initial magnetisation close to zero. This is useful when SCF is getting stuck
+  in a highly symmetric or oscillatory basin and needs a gentler symmetry break.
+
+These soft modes are reproducible when you set `seed=...` and can be tuned
+through `config["moment_assignment"]`, especially:
+
+- `soft_moment_scale`
+- `soft_min_candidate_moment`
+- `soft_max_candidate_moment`
+
+Example restart ladder for a difficult SCF:
+
+```python
+for strategy in ["afm_clusters", "afm_soft", "fm_soft", "balanced_random_soft"]:
+    magmoms, feature_dict, graph, ring_info = assign_initial_magnetic_moments(
+        atoms,
+        strategy=strategy,
+        cutoff=1.85,
+        maxlength=12,
+        k_hops=5,
+        seed=0,
+    )
+    atoms.set_initial_magnetic_moments(magmoms)
+    # Run your next DFT restart here.
 ```
 
 ## Package Layout

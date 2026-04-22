@@ -17,7 +17,14 @@ from .graph.bond_graph import (
 )
 from .graph.graph_ops import build_graph_with_mic_geometry
 from .graph.topology import summarize_ring_statistics
-from .seeding.assignment import assign_moments_afm_clusters, assign_moments_fm, assign_moments_random_candidates
+from .seeding.assignment import (
+    assign_moments_afm_clusters,
+    assign_moments_afm_soft,
+    assign_moments_balanced_random_soft,
+    assign_moments_fm,
+    assign_moments_fm_soft,
+    assign_moments_random_candidates,
+)
 from .seeding.scoring import assign_all_magnetic_scores
 
 
@@ -56,12 +63,25 @@ def assign_initial_magnetic_moments(
 
     if strategy == "fm":
         magmoms = assign_moments_fm(atoms, feature_dict, cfg)
+    elif strategy == "fm_soft":
+        magmoms = assign_moments_fm_soft(atoms, feature_dict, cfg)
     elif strategy == "afm_clusters":
         magmoms = assign_moments_afm_clusters(atoms, G, feature_dict, cfg)
+    elif strategy == "afm_soft":
+        magmoms = assign_moments_afm_soft(atoms, G, feature_dict, cfg)
     elif strategy == "random_candidates":
         magmoms = assign_moments_random_candidates(atoms, feature_dict, cfg, seed=seed)
+    elif strategy == "balanced_random_soft":
+        magmoms = assign_moments_balanced_random_soft(atoms, feature_dict, cfg, seed=seed)
     else:
-        valid = ["fm", "afm_clusters", "random_candidates"]
+        valid = [
+            "fm",
+            "fm_soft",
+            "afm_clusters",
+            "afm_soft",
+            "random_candidates",
+            "balanced_random_soft",
+        ]
         raise ValueError(f"Unknown strategy '{strategy}'. Expected one of {valid}.")
 
     ring_info = {

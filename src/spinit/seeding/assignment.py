@@ -64,7 +64,85 @@ def candidate_moment_amplitude(features: Mapping[str, Any], config: Mapping[str,
     scale_map = mcfg.get("element_moment_scale", {})
     amp *= float(scale_map.get(element, 1.0))
 
-    return float(np.clip(amp, float(mcfg["min_candidate_moment"]), float(mcfg["max_candidate_moment"])))
+    return float(
+        np.clip(amp, float(mcfg["min_candidate_moment"]), float(mcfg["max_candidate_moment"]))
+    )
+
+
+def soft_candidate_moment_amplitude(
+    features: Mapping[str, Any],
+    config: Mapping[str, Any],
+) -> float:
+    """Return a reduced-amplitude restart seed for difficult SCF convergence.
+
+    Context: The soft strategies keep the chemically screened candidate sites
+    but intentionally damp the initial moments so the DFT solver can approach
+    a spin-polarized solution more gently.
+    """
+    mcfg = config["moment_assignment"]
+    amp = candidate_moment_amplitude(features, config)
+    amp *= float(mcfg.get("soft_moment_scale", 0.35))
+
+    min_amp = float(mcfg.get("soft_min_candidate_moment", 0.05))
+    max_amp = float(mcfg.get("soft_max_candidate_moment", 0.50))
+    return float(np.clip(amp, min_amp, max_amp))
+
+
+def _cluster_sign_labels(subgraph: nx.Graph, cluster: list[int]) -> dict[int, int]:
+    """Return BFS alternating +/- labels for one connected candidate cluster."""
+    sign_labels: dict[int, int] = {int(cluster[0]): 1}
+    queue: deque[int] = deque([int(cluster[0])])
+
+    while queue:
+        u = int(queue.popleft())
+        for v_raw in subgraph.neighbors(u):
+            v = int(v_raw)
+            if v not in sign_labels:
+                sign_labels[v] = -sign_labels[u]
+                queue.append(v)
+            elif sign_labels[v] == sign_labels[u]:
+                continue
+
+    return sign_labels
+
+
+def _assign_clustered_moments(
+    atoms: Atoms,
+    G: nx.Graph,
+    feature_dict: Mapping[int, Mapping[str, Any]],
+    config: Mapping[str, Any],
+    amplitude_fn,
+) -> np.ndarray:
+    """Assign clustered signs using the provided amplitude function."""
+    magmoms = np.zeros(len(atoms), dtype=float)
+    candidate_sites = select_magnetic_candidate_sites(feature_dict, config)
+    if len(candidate_sites) == 0:
+        return magmoms
+
+    subgraph = G.subgraph(list(candidate_sites)).copy()
+    clusters = [sorted([int(i) for i in comp]) for comp in nx.connected_components(subgraph)]
+    clusters.sort(key=lambda cluster: (len(cluster), cluster), reverse=True)
+
+    for cluster in clusters:
+        mcfg = config.get("moment_assignment", {})
+        if bool(mcfg.get("o2_parallel_override_in_afm", True)) and _is_isolated_o2_like_cluster(
+            cluster,
+            feature_dict,
+        ):
+            sign = float(mcfg.get("o2_parallel_sign", 1.0))
+            sign = 1.0 if sign >= 0.0 else -1.0
+            for i in cluster:
+                amp = amplitude_fn(feature_dict[i], config)
+                magmoms[i] = sign * amp
+            continue
+
+        sign_labels = _cluster_sign_labels(subgraph, cluster)
+        for i in cluster:
+            sign = float(sign_labels.get(i, 1))
+            amp = amplitude_fn(feature_dict[i], config)
+            magmoms[i] = sign * amp
+
+    return magmoms
 
 
 def assign_moments_fm(
@@ -79,6 +157,18 @@ def assign_moments_fm(
     return magmoms
 
 
+def assign_moments_fm_soft(
+    atoms: Atoms,
+    feature_dict: Mapping[int, Mapping[str, Any]],
+    config: Mapping[str, Any],
+) -> np.ndarray:
+    """Assign small all-positive moments on selected candidates."""
+    magmoms = np.zeros(len(atoms), dtype=float)
+    for i in select_magnetic_candidate_sites(feature_dict, config):
+        magmoms[i] = soft_candidate_moment_amplitude(feature_dict[i], config)
+    return magmoms
+
+
 def assign_moments_afm_clusters(
     atoms: Atoms,
     G: nx.Graph,
@@ -90,43 +180,29 @@ def assign_moments_afm_clusters(
     Context: This applies graph-coloring-style sign alternation as a practical
     initialization heuristic for connected candidate regions, not a proof of ordering.
     """
-    magmoms = np.zeros(len(atoms), dtype=float)
-    candidate_sites = select_magnetic_candidate_sites(feature_dict, config)
-    if len(candidate_sites) == 0:
-        return magmoms
+    return _assign_clustered_moments(
+        atoms,
+        G,
+        feature_dict,
+        config,
+        amplitude_fn=candidate_moment_amplitude,
+    )
 
-    subgraph = G.subgraph(list(candidate_sites)).copy()
-    clusters = [sorted([int(i) for i in comp]) for comp in nx.connected_components(subgraph)]
-    clusters.sort(key=lambda cluster: (len(cluster), cluster), reverse=True)
 
-    for cluster in clusters:
-        mcfg = config.get("moment_assignment", {})
-        if bool(mcfg.get("o2_parallel_override_in_afm", True)) and _is_isolated_o2_like_cluster(cluster, feature_dict):
-            sign = float(mcfg.get("o2_parallel_sign", 1.0))
-            sign = 1.0 if sign >= 0.0 else -1.0
-            for i in cluster:
-                amp = candidate_moment_amplitude(feature_dict[i], config)
-                magmoms[i] = sign * amp
-            continue
-
-        sign_labels: dict[int, int] = {int(cluster[0]): 1}
-        queue: deque[int] = deque([int(cluster[0])])
-        while queue:
-            u = int(queue.popleft())
-            for v_raw in subgraph.neighbors(u):
-                v = int(v_raw)
-                if v not in sign_labels:
-                    sign_labels[v] = -sign_labels[u]
-                    queue.append(v)
-                elif sign_labels[v] == sign_labels[u]:
-                    continue
-
-        for i in cluster:
-            sign = float(sign_labels.get(i, 1))
-            amp = candidate_moment_amplitude(feature_dict[i], config)
-            magmoms[i] = sign * amp
-
-    return magmoms
+def assign_moments_afm_soft(
+    atoms: Atoms,
+    G: nx.Graph,
+    feature_dict: Mapping[int, Mapping[str, Any]],
+    config: Mapping[str, Any],
+) -> np.ndarray:
+    """Assign small AFM-like cluster moments for restart-friendly seeding."""
+    return _assign_clustered_moments(
+        atoms,
+        G,
+        feature_dict,
+        config,
+        amplitude_fn=soft_candidate_moment_amplitude,
+    )
 
 
 def assign_moments_random_candidates(
@@ -143,5 +219,45 @@ def assign_moments_random_candidates(
         sign = float(rng.choice([-1.0, 1.0]))
         amp = candidate_moment_amplitude(feature_dict[i], config)
         magmoms[i] = sign * amp
+
+    return magmoms
+
+
+def assign_moments_balanced_random_soft(
+    atoms: Atoms,
+    feature_dict: Mapping[int, Mapping[str, Any]],
+    config: Mapping[str, Any],
+    seed: int = 0,
+) -> np.ndarray:
+    """Assign small random signs while keeping the net seed moment near zero.
+
+    Context: This is useful when a fully aligned or cluster-alternating seed is
+    too stiff, but a little symmetry breaking is still needed to help SCF escape
+    a zero-moment basin.
+    """
+    rng = np.random.default_rng(seed)
+    magmoms = np.zeros(len(atoms), dtype=float)
+
+    ordered = [
+        (int(i), soft_candidate_moment_amplitude(feature_dict[i], config))
+        for i in select_magnetic_candidate_sites(feature_dict, config)
+    ]
+    rng.shuffle(ordered)
+    ordered.sort(key=lambda item: item[1], reverse=True)
+
+    running_total = 0.0
+    for i, amp in ordered:
+        plus_total = running_total + amp
+        minus_total = running_total - amp
+
+        if abs(plus_total) < abs(minus_total):
+            sign = 1.0
+        elif abs(minus_total) < abs(plus_total):
+            sign = -1.0
+        else:
+            sign = float(rng.choice([-1.0, 1.0]))
+
+        magmoms[i] = sign * amp
+        running_total += sign * amp
 
     return magmoms
