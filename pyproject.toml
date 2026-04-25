@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spinit"
-version = "0.0.3"
+version = "0.1.0"
 description = "Physically informed spin initialisation for carbon-rich atomistic structures."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
